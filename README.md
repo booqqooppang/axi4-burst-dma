@@ -163,9 +163,7 @@ The DMA engine (`simple_dma_axi_burst`) exposes a control/status interface and A
 | `HALTED` | Fault state (address/align/AXI error), waiting for `dma_run_stop` to deassert |
 | `READ_DRAIN` | Absorbs remaining in-flight read beats after a protocol violation, before moving to `HALTED` |
 
-<br>
-
-## DMA Operation
+### Operation
 
 1. Software writes the source address, destination address, transfer length, and control register, then sets `DMA_CR.RUN_STOP = 1`.
 2. DMA validates the request (alignment, non-zero length, SG disabled) and calculates the current burst length (see [4KB Boundary Handling](#4kb-boundary-handling)).
@@ -228,3 +226,51 @@ Burst #2
 The complete 16-byte DMA request succeeds through two legal AXI bursts.
 
 <br>
+
+## Error Handling
+
+| Condition | DMA Behavior | CSR Status Behavior |
+|---|---|---|
+| Source/destination upper address is non-zero | DMA enters `HALTED` | `ERR_ADDR` is set |
+| Unaligned address | DMA enters `HALTED` | `ERR_ALIGN` is set |
+| Zero transfer length | DMA enters `HALTED` | `ERR_ALIGN` is set |
+| Transfer length not divisible by 4 | DMA enters `HALTED` | `ERR_ALIGN` is set |
+| Scatter-gather enabled | DMA enters `HALTED` | No dedicated SG error flag in current register map |
+| `RRESP != OKAY` | DMA drains response channel and enters `HALTED` | Not currently exposed in CSR status register |
+| `BRESP != OKAY` | DMA enters `HALTED` | Not currently exposed in CSR status register |
+| Early or missing/late `RLAST` | DMA enters `HALTED`; drain is used for missing/late `RLAST` | Not currently exposed in CSR status register |
+
+> `simple_dma_axi_burst` generates `hw_err_axi_set`, but the current
+> `csr_register_bank` does not yet store this signal in `DMA_SR`.
+> AXI error status reporting through the CSR block is planned future work.
+
+<br>
+
+## Design Decisions
+
+## Verification
+
+## Synthesis Results
+
+## How to Simulate
+
+## Directory Structure
+
+```text
+.
+├── LICENSE
+├── README.md
+├── .gitignore
+├── rtl/
+│   ├── dma_top.sv
+│   ├── csr_register_bank.sv
+│   └── simple_dma_axi_burst.sv
+├── tb/
+│   └── tb_dma_top.sv
+├── docs/
+│   ├── architecture.md
+│   ├── verification_plan.md
+│   ├── test_results.md
+│   └── register_map.xlsx
+└── sim/
+    └── README.md
