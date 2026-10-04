@@ -48,7 +48,7 @@ The two modules are kept separate on purpose. The CSR block holds all the state 
 |  |  Status Register                                  |  |
 |  |  - Halted / Idle                                  |  |
 |  |  - IOC Interrupt Status                           |  |
-|  |  - Address / Alignment Error Status               |  |
+|  |  - Address / Alignment / AXI Error Status         |  |
 |  +-----------------------+----------------------------+  |
 |                          | DMA configuration             |
 |                          v                               |
@@ -114,7 +114,7 @@ The two modules are kept separate on purpose. The CSR block holds all the state 
 - The currently verified configuration is `BYTES_PER_BEAT = 4` and `BURST_BEATS = 4`.
 - The current RTL uses a 32-bit AXI data path and 4-bit write strobes.
 - Transfers must be full-width and 4-byte aligned.
-- This version should not be considered fully parameterized — see [Limitations & Future Work](#limitations--future-work).
+- This version should not be considered fully parameterized
 - Only AXI4 INCR bursts are supported.
 - Scatter-gather operation is not supported.
 
@@ -167,56 +167,11 @@ The DMA engine (`simple_dma_axi_burst`) exposes a control/status interface and A
 
 ## DMA Operation
 
-```text
-1. Configure DMA registers through the control interface:
-   - Source address
-   - Destination address
-   - Transfer length
-   - Control register
-
-2. Set DMA_CR.RUN_STOP = 1.
-
-3. DMA validates the request:
-   - Scatter-gather disabled
-   - Upper source/destination address words equal zero
-   - Source address aligned to 4 bytes
-   - Destination address aligned to 4 bytes
-   - Transfer length is non-zero
-   - Transfer length is a multiple of 4 bytes
-
-4. DMA calculates current burst length:
-   - Remaining transfer length
-   - Maximum configured burst length
-   - Source 4KB boundary limit
-   - Destination 4KB boundary limit
-
-5. DMA issues AXI4 read burst:
-   - ARADDR
-   - ARLEN
-   - ARSIZE
-   - ARBURST = INCR
-
-6. DMA receives read data:
-   - Stores each beat in the internal burst buffer
-   - Checks RRESP
-   - Checks RLAST position
-
-7. DMA issues AXI4 write burst:
-   - AWADDR
-   - AWLEN
-   - AWSIZE
-   - AWBURST = INCR
-
-8. DMA writes buffered data:
-   - WDATA
-   - WSTRB = 4'b1111
-   - WLAST on the final beat
-
-9. DMA checks BRESP:
-   - On OKAY, updates addresses and remaining length
-   - Starts the next burst or enters DONE
-   - On error, enters HALTED
-```
+1. Software writes the source address, destination address, transfer length, and control register, then sets `DMA_CR.RUN_STOP = 1`.
+2. DMA validates the request (alignment, non-zero length, SG disabled) and calculates the current burst length (see [4KB Boundary Handling](#4kb-boundary-handling)).
+3. DMA issues an AXI4 read burst, buffers the incoming data, and checks `RRESP`/`RLAST`.
+4. DMA issues an AXI4 write burst from the buffered data.
+5. DMA checks `BRESP` — on success, it updates the addresses/remaining length and starts the next burst or completes; on error, it enters `HALTED`.
 
 <br>
 
