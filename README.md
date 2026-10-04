@@ -163,7 +163,7 @@ The DMA engine (`simple_dma_axi_burst`) exposes a control/status interface and A
 | `HALTED` | Fault state (address/align/AXI error), waiting for `dma_run_stop` to deassert |
 | `READ_DRAIN` | Absorbs remaining in-flight read beats after a protocol violation, before moving to `HALTED` |
 
-### Operation
+### Typical Operation Sequence
 
 1. Software writes the source address, destination address, transfer length, and control register, then sets `DMA_CR.RUN_STOP = 1`.
 2. DMA validates the request (alignment, non-zero length, SG disabled) and calculates the current burst length (see [4KB Boundary Handling](#4kb-boundary-handling)).
@@ -274,3 +274,13 @@ The complete 16-byte DMA request succeeds through two legal AXI bursts.
 │   └── register_map.xlsx
 └── sim/
     └── README.md
+```
+
+## remained task
+1. readme 수정
+2. simulation 파형 첨부
+3. verification 문서 수정
+4. synthesis result 추가
+5. tb 수정
+6. architecture 만들기
+7. 
