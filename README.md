@@ -236,23 +236,109 @@ The complete 16-byte DMA request succeeds through two legal AXI bursts.
 | Zero transfer length | DMA enters `HALTED` | `ERR_ALIGN` is set |
 | Transfer length not divisible by 4 | DMA enters `HALTED` | `ERR_ALIGN` is set |
 | Scatter-gather enabled | DMA enters `HALTED` | No dedicated SG error flag in current register map |
-| `RRESP != OKAY` | DMA drains response channel and enters `HALTED` | Not currently exposed in CSR status register |
-| `BRESP != OKAY` | DMA enters `HALTED` | Not currently exposed in CSR status register |
-| Early or missing/late `RLAST` | DMA enters `HALTED`; drain is used for missing/late `RLAST` | Not currently exposed in CSR status register |
-
-> `simple_dma_axi_burst` generates `hw_err_axi_set`, but the current
-> `csr_register_bank` does not yet store this signal in `DMA_SR`.
-> AXI error status reporting through the CSR block is planned future work.
+| `RRESP != OKAY` | DMA drains response channel and enters `HALTED` | `ERR_AXI` is set |
+| `BRESP != OKAY` | DMA enters `HALTED` | `ERR_AXI` is set |
+| Early or missing/late `RLAST` | DMA enters `HALTED`; drain is used for missing/late `RLAST` | `ERR_AXI` is set |
 
 <br>
 
 ## Design Decisions
 
+### Independent CSR Write Channels
+
+The control interface handles AXI write address and write data channels independently.
+
+The CSR block does not assume that `AWVALID` and `WVALID` arrive in the same cycle.
+
+```text
+AWVALID && AWREADY
+    -> Capture write address
+
+WVALID && WREADY
+    -> Capture write data and write strobes
+
+Address captured AND data captured
+    -> Commit register write
+    -> Assert BVALID
+```
+
+This behavior matches the independent AXI write-address and write-data channel model.
+
+### Burst Buffer Architecture
+
+The DMA receives an entire read burst before issuing the corresponding write burst.
+
+```text
+AXI Read Burst
+      |
+      v
+Internal Burst Buffer
+      |
+      v
+AXI Write Burst
+```
+
+This design is intentionally simple and supports clear transaction sequencing and error handling. It does not overlap read and write transactions, so it does not target maximum memory bandwidth.
+
+### 4KB Boundary Protection
+
+The DMA calculates separate source and destination limits before issuing each burst. The smaller legal boundary limit is used as the current burst length.
+
+This prevents both read and write AXI bursts from crossing a 4KB boundary.
+
+### Read-Response Drain
+
+If an AXI read response error occurs or the expected final read beat arrives without `RLAST`, the DMA keeps `RREADY` asserted in the `READ_DRAIN` state.
+
+The controller discards remaining read data until it receives `RLAST`, then enters `HALTED`. This prevents the DMA from leaving an AXI read transaction incomplete and blocking the read-data channel.
+
+<br>
+
 ## Verification
+
+The project uses a directed, self-checking SystemVerilog testbench.
+
+The testbench configures `dma_top` through the control-register interface, models an AXI4 memory slave, initializes source memory, starts DMA operation, waits for completion or halt, and compares destination memory against expected source data.
+
+| Test Case | Description | Expected Result | Status |
+|---|---|---|---|
+| CSR register write/read | Writes DMA configuration and reads back register values | Register data matches expected values | PASS |
+| Byte-enable write | Uses `WSTRB` to update selected register bytes | Only selected register bytes change | PASS |
+| Basic 16-byte transfer | One 4-beat read burst and one 4-beat write burst | Data copied correctly; DMA enters DONE | PASS |
+| Multiple burst transfer | 32-byte transfer using two 4-beat bursts | Data copied correctly across two bursts | PASS |
+| Partial final burst | Transfer has a final burst shorter than four beats | Correct dynamic `ARLEN`, `AWLEN`, `RLAST`, and `WLAST` behavior | PASS |
+| AXI backpressure | Delayed READY/VALID responses on AXI channels | DMA maintains valid data/control until handshake | PASS |
+| Source 4KB split | Source begins near 4KB boundary | Read burst is split before crossing boundary | PASS |
+| Destination 4KB split | Destination begins near 4KB boundary | Write burst is split before crossing boundary | PASS |
+| Read response error | Memory model returns non-OKAY `RRESP` | DMA drains read channel and enters HALTED | PASS |
+| Write response error | Memory model returns non-OKAY `BRESP` | DMA enters HALTED | PASS |
+| Early `RLAST` | Read slave asserts `RLAST` too early | DMA detects error and enters HALTED | PASS |
+| Missing/late `RLAST` | Expected final read beat has no `RLAST` | DMA enters READ_DRAIN, waits for `RLAST`, then halts | PASS |
+| Alignment error | Unaligned source/destination or invalid transfer length | DMA enters HALTED and sets alignment error flag | PASS |
+| Unsupported SG mode | `SG_EN = 1` | DMA enters HALTED | PASS |
+
+See [verification_plan.md](docs/verification_plan.md) for detailed test objectives and [test_results.md](docs/test_results.md) for simulation output, waveform locations, and executed test conditions.
+
+<br>
 
 ## Synthesis Results
 
 ## How to Simulate
+
+Example Questa/ModelSim simulation flow:
+
+```bash
+vlib work
+
+vlog -sv rtl/csr_register_bank.sv
+vlog -sv rtl/simple_dma_axi_burst.sv
+vlog -sv rtl/dma_top.sv
+vlog -sv tb/tb_dma_top.sv
+
+vsim -c tb_dma_top -do "run -all; quit"
+```
+
+<br>
 
 ## Directory Structure
 
