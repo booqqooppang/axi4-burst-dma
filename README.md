@@ -246,9 +246,9 @@ The complete 16-byte DMA request succeeds through two legal AXI bursts.
 
 ### Independent CSR Write Channels
 
-The control interface handles AXI write address and write data channels independently. The `csr_register_bank` supports both simultaneous and independent AXI4-Lite write-address and write-data handshakes. It captures `AWADDR` and `WDATA/WSTRB` independently, commits the register write after both handshakes have completed, and then asserts `BVALID`.
+The `csr_register_bank` captures the AXI4-Lite write-address (`AWADDR`) and write-data (`WDATA`/`WSTRB`) handshakes independently — they may arrive together or in either order — and commits the register write once both have completed, then asserts `BVALID`.
 
-`AWREADY` and `WREADY` are deasserted while a previous write is still waiting on `BVALID`, so writes are processed one at a time (no back-to-back write pipelining).
+`AWREADY` and `WREADY` are deasserted while a previous write is still waiting on `BVALID`, so writes are processed one at a time (no back-to-back pipelining).
 
 ```text
 AWVALID && AWREADY
