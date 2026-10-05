@@ -246,9 +246,9 @@ The complete 16-byte DMA request succeeds through two legal AXI bursts.
 
 ### Independent CSR Write Channels
 
-The control interface handles AXI write address and write data channels independently.
+The control interface handles AXI write address and write data channels independently. The `csr_register_bank` supports both simultaneous and independent AXI4-Lite write-address and write-data handshakes. It captures `AWADDR` and `WDATA/WSTRB` independently, commits the register write after both handshakes have completed, and then asserts `BVALID`.
 
-The CSR block does not assume that `AWVALID` and `WVALID` arrive in the same cycle.
+`AWREADY` and `WREADY` are deasserted while a previous write is still waiting on `BVALID`, so writes are processed one at a time (no back-to-back write pipelining).
 
 ```text
 AWVALID && AWREADY
@@ -278,13 +278,7 @@ Internal Burst Buffer
 AXI Write Burst
 ```
 
-This design is intentionally simple and supports clear transaction sequencing and error handling. It does not overlap read and write transactions, so it does not target maximum memory bandwidth.
-
-### 4KB Boundary Protection
-
-The DMA calculates separate source and destination limits before issuing each burst. The smaller legal boundary limit is used as the current burst length.
-
-This prevents both read and write AXI bursts from crossing a 4KB boundary.
+This design keeps the read and write steps separate, which makes the DMA flow and error handling easier to understand. The DMA finishes reading one burst before it starts writing that burst, so it is designed for simplicity and reliable operation rather than maximum memory bandwidth.
 
 ### Read-Response Drain
 
