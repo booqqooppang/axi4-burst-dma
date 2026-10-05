@@ -357,10 +357,13 @@ vsim -c tb_dma_top -do "run -all; quit"
 ```
 
 ## remained task
-1. readme 수정
+**axi4-burst_dma
+1. readme - verification 수정
 2. simulation 파형 첨부
 3. verification 문서 수정
-4. synthesis result 추가
+4. readme - synthesis result 추가
 5. tb 수정
 6. architecture 만들기
-7. 
+
+**async-fifo
+1. block diagram 제작
