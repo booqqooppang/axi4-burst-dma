@@ -385,28 +385,25 @@ vsim -c tb_dma_top -do "run -all; quit"
 .
 ├── LICENSE
 ├── README.md
-├── .gitignore
 ├── rtl/
 │   ├── dma_top.sv
 │   ├── csr_register_bank.sv
 │   └── simple_dma_axi_burst.sv
 ├── tb/
 │   └── tb_dma_top.sv
-├── docs/
-│   ├── architecture.md
-│   ├── verification_plan.md
-│   ├── test_results.md
-│   └── register_map.xlsx
-└── sim/
-    └── README.md
+└── docs/
+    ├── architecture.png
+    ├── verification_results.md
+    └── register_map.xlsx
+    └── waveform/
+        ├── full_empty_boundary.png
+        └── cdc_sync.png
 ```
 
 ## remained task
 **axi4-burst_dma
-1. readme - verification 수정
 2. simulation 파형 첨부
 3. verification 문서 수정
-5. tb 수정
 6. architecture 만들기
 
 **async-fifo
