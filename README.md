@@ -297,7 +297,7 @@ The verification suite covers:
 - Source/destination 4KB boundary splitting
 - Response errors, RLAST violations, alignment errors, and unsupported SG mode
 
-See [verification_result.md](docs/verification_result.md) for the complete test case table and simulation results.
+See [verification_results.md](docs/verification_results.md) for the complete test case table and simulation results.
 
 <br>
 
