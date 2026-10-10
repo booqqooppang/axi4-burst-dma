@@ -121,7 +121,7 @@ The two modules are kept separate on purpose. The CSR block holds all the state 
 
 ## Interface
 
-The DMA engine (`simple_dma_axi_burst`) exposes a control/status interface and AXI4 memory-master interfaces; `csr_register_bank` exposes these same control/status signals through its AXI4-Lite register map (see [Register Map](#register-map-axi4-lite-csr)).
+The DMA engine (`simple_dma_axi_burst`) exposes a control/status interface and AXI4 memory-master interfaces; `csr_register_bank` exposes these same control/status signals through its AXI4-Lite register map (see [register_map](docs/register_map.xlsx)).
 
 | Signal group | Direction | Description |
 |---|---|---|
