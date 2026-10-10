@@ -317,6 +317,65 @@ See [verification_plan.md](docs/verification_plan.md) for detailed test objectiv
 
 ## Synthesis Results
 
+The design was compiled successfully using Intel Quartus Prime Pro Edition,
+targeting a Cyclone 10 GX FPGA.
+
+### Compilation Environment
+
+| Item | Result |
+|---|---|
+| Tool | Intel Quartus Prime Pro Edition 18.0.0 Build 219 |
+| Compilation date | October 6, 2026 |
+| Top-level entity | `dma_top` |
+| Target family | Cyclone 10 GX |
+| Target device | `10CX220YF780I5G` |
+| Compilation status | Successful |
+| Timing models | Final |
+
+### Resource Utilization
+
+| Resource | Usage |
+|---|---|
+| Logic | 381 / 80,330 ALMs (< 1%) |
+| Registers | 708 |
+| Block memory | 0 / 12,021,760 bits (0%) |
+| DSP blocks | 0 / 192 (0%) |
+| PLLs | 0 / 30 (0%) |
+
+### Timing Results
+
+The `aclk` clock is constrained to a 10.000 ns period (100 MHz).
+
+| Item | Result |
+|---|---|
+| Clock | `aclk` |
+| Target clock frequency | 100 MHz |
+| Reported Fmax | 173.55 MHz |
+| Reported Restricted Fmax | 173.55 MHz |
+| Setup slack | +4.238 ns |
+| Hold slack | +0.056 ns |
+| Minimum pulse width slack | +4.915 ns |
+| Setup endpoint TNS | 0.000 ns |
+| Hold endpoint TNS | 0.000 ns |
+| Minimum pulse width endpoint TNS | 0.000 ns |
+
+The reported setup, hold, and minimum pulse width checks pass
+for the analyzed paths under the 100 MHz clock constraint.
+
+### Analysis Scope and Limitations
+
+- External input and output timing is not constrained in this standalone build.
+- Recovery and removal reports contain no analyzed paths and are not reported
+  as PASS.
+- Worst-case timing across all operating corners has not been confirmed.
+- The reported Fmax is a static timing-analysis result, not a measured
+  board-level operating frequency.
+- Physical I/O assignments are not finalized.
+- These results do not demonstrate complete system-level timing closure
+  or board-level operation.
+
+<br>
+
 ## How to Simulate
 
 Example Questa/ModelSim simulation flow:
