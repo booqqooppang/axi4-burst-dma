@@ -114,7 +114,6 @@ The two modules are kept separate on purpose. The CSR block holds all the state 
 - The currently verified configuration is `BYTES_PER_BEAT = 4` and `BURST_BEATS = 4`.
 - The current RTL uses a 32-bit AXI data path and 4-bit write strobes.
 - Transfers must be full-width and 4-byte aligned.
-- This version should not be considered fully parameterized
 - Only AXI4 INCR bursts are supported.
 - Scatter-gather operation is not supported.
 
@@ -278,7 +277,7 @@ Internal Burst Buffer
 AXI Write Burst
 ```
 
-This design keeps the read and write steps separate, which makes the DMA flow and error handling easier to understand. The DMA finishes reading one burst before it starts writing that burst, so it is designed for simplicity and reliable operation rather than maximum memory bandwidth.
+This keeps the DMA flow and error handling simple, but reads and writes do not overlap, which limits memory throughput.
 
 ### Read-Response Drain
 
@@ -365,8 +364,8 @@ for the analyzed paths under the 100 MHz clock constraint.
 ### Analysis Scope and Limitations
 
 - External input and output timing is not constrained in this standalone build.
-- Recovery and removal reports contain no analyzed paths and are not reported
-  as PASS.
+- Recovery and removal timing checks report no analyzed paths, so they are
+  not counted as PASS results.
 - Worst-case timing across all operating corners has not been confirmed.
 - The reported Fmax is a static timing-analysis result, not a measured
   board-level operating frequency.
@@ -420,7 +419,6 @@ vsim -c tb_dma_top -do "run -all; quit"
 1. readme - verification 수정
 2. simulation 파형 첨부
 3. verification 문서 수정
-4. readme - synthesis result 추가
 5. tb 수정
 6. architecture 만들기
 
