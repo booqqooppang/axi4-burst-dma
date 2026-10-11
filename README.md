@@ -23,57 +23,7 @@ The two modules are kept separate on purpose. The CSR block holds all the state 
 
 ## Architecture
 
-```text
-       AXI4-Lite-Style Control / Status Interface
-                             |
-                             v
-+----------------------------------------------------------+
-|                         dma_top                          |
-|                                                          |
-|  +----------------------------------------------------+  |
-|  |                csr_register_bank                  |  |
-|  |                                                    |  |
-|  |  Control Registers                                |  |
-|  |  - Run/Stop                                       |  |
-|  |  - Reset                                          |  |
-|  |  - Scatter-Gather Enable                          |  |
-|  |  - IOC/Error Interrupt Enable                     |  |
-|  |                                                    |  |
-|  |  Configuration Registers                          |  |
-|  |  - Source Address                                 |  |
-|  |  - Destination Address                            |  |
-|  |  - Transfer Length                                |  |
-|  |  - Current/Tail Descriptor Address                |  |
-|  |                                                    |  |
-|  |  Status Register                                  |  |
-|  |  - Halted / Idle                                  |  |
-|  |  - IOC Interrupt Status                           |  |
-|  |  - Address / Alignment / AXI Error Status         |  |
-|  +-----------------------+----------------------------+  |
-|                          | DMA configuration             |
-|                          v                               |
-|  +----------------------------------------------------+  |
-|  |              simple_dma_axi_burst                 |  |
-|  |                                                    |  |
-|  |  Burst-Length / 4KB Boundary Logic                |  |
-|  |       |                                            |  |
-|  |       v                                            |  |
-|  |  AXI4 Read Master --> Internal Burst Buffer       |  |
-|  |                                  |                 |  |
-|  |                                  v                 |  |
-|  |                    AXI4 Write Master              |  |
-|  +-----------------------+----------------------------+  |
-|                          | DMA status/error              |
-+----------------------------------------------------------+
-                           |
-                           v
-                    AXI4 Memory Interface
-                           |
-              +------------+------------+
-              |                         |
-              v                         v
-        Source Memory             Destination Memory
-```
+![axi4-burst-dma architecture](docs/architecture.png)
 
 <br>
 
