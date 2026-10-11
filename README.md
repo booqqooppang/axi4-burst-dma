@@ -322,9 +322,10 @@ vlib work
 vlog -sv rtl/csr_register_bank.sv
 vlog -sv rtl/simple_dma_axi_burst.sv
 vlog -sv rtl/dma_top.sv
+vlog -sv tb/dma_axi_assertions.sv
 vlog -sv tb/tb_dma_top.sv
 
-vsim -c tb_dma_top -do "run -all; quit"
+vsim -voptargs="+acc" -t ns work.tb_dma_burst_top
 ```
 
 <br>
@@ -354,7 +355,4 @@ vsim -c tb_dma_top -do "run -all; quit"
 **axi4-burst_dma
 2. simulation 파형 첨부
 3. verification 문서 수정
-6. architecture 만들기
 
-**async-fifo
-1. block diagram 제작
