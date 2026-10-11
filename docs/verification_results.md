@@ -4,6 +4,8 @@
 
 The DMA subsystem is tested using a directed, self-checking SystemVerilog testbench. The testbench configures `dma_top` through the CSR interface and checks transferred data, DMA states, and error behavior.
 
+<br>
+
 ## Simulation Environment
 
 | Item | Value |
