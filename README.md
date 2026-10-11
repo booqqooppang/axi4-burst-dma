@@ -347,9 +347,3 @@ vsim -voptargs="+acc" -t ns work.tb_dma_burst_top
     ├── verification_results.md
     └── register_map.xlsx
 ```
-
-## remained task
-**axi4-burst_dma
-2. simulation 파형 첨부
-3. verification 문서 수정
-
