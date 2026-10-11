@@ -346,9 +346,6 @@ vsim -voptargs="+acc" -t ns work.tb_dma_burst_top
     ├── architecture.png
     ├── verification_results.md
     └── register_map.xlsx
-    └── waveform/
-        ├── full_empty_boundary.png
-        └── cdc_sync.png
 ```
 
 ## remained task
